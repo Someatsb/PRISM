@@ -5,7 +5,8 @@ Official implementation of **PRISM: Reliable LLM Knowledge Distillation from Gra
 PRISM is a reliability-aware knowledge distillation framework for few-label node classification on text-attributed graphs (TAGs). It improves the reliability of LLM-generated supervision by constructing multiple graph-context perspectives for each target node and estimating knowledge reliability based on cross-perspective consistency.
 
 ## Overview
-<img width="1346" height="492" alt="image" src="https://github.com/user-attachments/assets/3a2d4776-acc1-43cc-aa66-9308c028a5da" />
+<img width="900" height="493" alt="image" src="./assets/PRISM.png" />
+
 
 Text-attributed graph (TAG) learning aims to leverage both textual attributes and graph structures for node classification. In few-label settings, however, GNNs often struggle to learn reliable decision boundaries due to the limited availability of labeled nodes.
 
