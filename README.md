@@ -66,11 +66,10 @@ Example command:
 
 ```bash
 python main.py \
-  --dataset Cora \
+  --dataset cora \
   --init_n_per_class 3 \
   --perspective 3 \
-  --use_neighbor 1 \
-  --train_methods N+S_OPM
+  --use_neighbor 3 \
 ```
 
 
