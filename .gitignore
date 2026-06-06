@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Environment
+.env
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# Dataset / large files
+dataset/
+datasets/
+data/
+*.pt
+*.pth
+*.ckpt
+*.pkl
+*.pickle
+*.npy
+*.npz
+
+# Experiment logs
+wandb/
+runs/
+outputs/
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
