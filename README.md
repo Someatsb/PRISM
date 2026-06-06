@@ -1,27 +1,26 @@
 # PRISM
 
-Official implementation of **PRISM: Perspective-based Reliable Imitation with Semantic Multiplicity** for few-label node classification on text-attributed graphs.
+Official implementation of **PRISM: Reliable LLM Knowledge Distillation from Graph-Context Perspectives for Text-Attributed Graph Learning**.
+
+PRISM is a reliability-aware knowledge distillation framework for few-label node classification on text-attributed graphs (TAGs). It improves the reliability of LLM-generated supervision by constructing multiple graph-context perspectives for each target node and estimating knowledge reliability based on cross-perspective consistency.
 
 ## Overview
 
-Text-attributed graph (TAG) learning aims to predict node labels by jointly leveraging textual attributes and graph structure.
-However, in few-label settings, GNNs often suffer from limited supervision, while LLM-generated knowledge can also be unreliable when it is generated only from the textual attribute of a target node.
+Text-attributed graph (TAG) learning aims to leverage both textual attributes and graph structures for node classification. In few-label settings, however, GNNs often struggle to learn reliable decision boundaries due to the limited availability of labeled nodes.
 
-PRISM addresses this problem by generating multiple graph-context perspectives for each target node and estimating the reliability of LLM-generated knowledge across these perspectives.
-The estimated reliability is then used as a weight for knowledge distillation, enabling GNNs to learn more from reliable LLM supervision while reducing the influence of unreliable responses.
+Recent LLM-assisted TAG learning methods use Large Language Models (LLMs) to generate pseudo-labels and rationales as additional supervision for GNN training. However, these methods typically rely only on the textual attribute of each target node. When node texts are short, ambiguous, or incomplete, the generated pseudo-labels and rationales can become unreliable and may act as noisy supervision.
 
-## Key Ideas
+PRISM addresses this limitation by exploiting graph-context information. For each target node, PRISM constructs multiple structural-context perspectives using different sets of neighboring nodes. The LLM generates pseudo-labels and rationales from each perspective. PRISM then estimates the reliability of generated knowledge based on label agreement and rationale consistency across perspectives, and uses the estimated reliability as a distillation weight during GNN training.
 
-PRISM consists of three main components:
+## Key Features
 
-* **Multi-Perspective Knowledge Generation**
-  Generates multiple LLM responses for each target node by considering different graph-context perspectives.
+* Multi-perspective LLM knowledge generation from graph-context perspectives
+* Reliability estimation based on cross-perspective consistency
+* Reliability-aware class-level and rationale-level knowledge distillation
+* Active node selection under a limited LLM query budget
+* Evaluation on five text-attributed graph benchmark datasets
 
-* **Reliability Weight Estimation**
-  Estimates the reliability of LLM-generated knowledge based on label agreement and rationale consistency across perspectives.
 
-* **Reliable Knowledge Distillation**
-  Distills LLM-generated labels and rationales into a GNN using reliability-aware weights.
 
 ## Requirements
 
@@ -31,12 +30,11 @@ Install the required packages with:
 pip install -r requirements.txt
 ```
 
-The implementation is based on Python and PyTorch.
-Please make sure that PyTorch Geometric and other graph learning dependencies are properly installed according to your CUDA environment.
+The implementation is based on Python and PyTorch. Please install PyTorch Geometric and other graph learning dependencies according to your CUDA environment.
 
 ## Datasets
 
-We evaluate PRISM on widely used text-attributed graph benchmark datasets, including:
+PRISM is evaluated on the following text-attributed graph benchmark datasets:
 
 * Cora
 * Citeseer
@@ -44,13 +42,13 @@ We evaluate PRISM on widely used text-attributed graph benchmark datasets, inclu
 * DBLP
 * ogbn-arxiv
 
-Please place the datasets under the following directory:
+Please download the datasets from [Dataset](https://drive.google.com/drive/folders/1ZLF8ge2uxHDgiLtnYiofayWddBnr0UQ0?usp=sharing) and place the datasets under:
 
 ```text
 dataset/
 ```
 
-The expected structure is:
+Expected directory structure:
 
 ```text
 dataset/
@@ -63,7 +61,7 @@ dataset/
 
 ## Running PRISM
 
-An example command for running PRISM is:
+Example command:
 
 ```bash
 python main.py \
@@ -74,6 +72,7 @@ python main.py \
   --train_methods N+S_OPM
 ```
 
-You can modify the dataset, number of labeled nodes per class, number of perspectives, and training options depending on the experimental setting.
+
+## Contact
 
 For questions or discussions, please open an issue in this repository.
