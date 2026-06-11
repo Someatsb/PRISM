@@ -16,7 +16,7 @@ def load_llm(model_id=DEFAULT_MODEL_ID):
     llm = LLM(
         model=model_id,
         dtype="bfloat16",
-        gpu_memory_utilization=0.85,
+        gpu_memory_utilization=0.6,
         max_model_len=8192,
         enforce_eager=True,
     )

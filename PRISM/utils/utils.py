@@ -17,6 +17,15 @@ def Encoding_sbert(LLM_feature, args , model_name='all-MiniLM-L6-v2'):
     
     if not texts:
         return LLM_feature
+
+    
+    embeddings = model.encode(texts, convert_to_tensor=True, device=args.device)
+    
+    for i, item in enumerate(LLM_feature):
+        item['rationale_emb'] = embeddings[i]
+        
+    return LLM_feature
+
     
 def load_data(data_path, device):
     data = torch.load(data_path, map_location='cpu')

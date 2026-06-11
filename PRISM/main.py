@@ -215,11 +215,11 @@ def print_seed_summary(seed_idx, train_mask, val_mask, test_mask, pool_mask):
     print(f"Active pool nodes: {pool_mask.sum().item()}")
 
 
-def print_round_summary(cur_round, llm_count, llm_acc, test_acc, selected_nodes=None):
+def print_round_summary(cur_round, llm_count, test_acc, selected_nodes=None):
     message = (
         f"[Round {cur_round}] "
         f"LLM features: {llm_count} | "
-        f"LLM acc: {llm_acc:.2f} | "
+
         f"Test acc: {test_acc:.2f}"
     )
 
@@ -229,12 +229,11 @@ def print_round_summary(cur_round, llm_count, llm_acc, test_acc, selected_nodes=
     print(message)
 
 
-def log_round_result(seed_idx, cur_round, test_acc, llm_acc, llm_count, selected_count):
+def log_round_result(seed_idx, cur_round, test_acc,  llm_count, selected_count):
     wandb.log({
         "seed": seed_idx,
         "round": cur_round,
         f"round_{cur_round}/test_acc": test_acc,
-        f"round_{cur_round}/llm_acc": llm_acc,
         f"round_{cur_round}/llm_feature_count": llm_count,
         f"round_{cur_round}/selected_count": selected_count,
     })
@@ -260,7 +259,6 @@ def run_single_seed(seed_idx, data, graph_nx, args, llm, tokenizer):
     current_target_nodes = init_node_indices
 
     seed_round_acc = []
-    seed_llm_acc = []
     best_acc = -1.0
     best_round = -1
 
@@ -281,8 +279,6 @@ def run_single_seed(seed_idx, data, graph_nx, args, llm, tokenizer):
         else:
             all_llm_features.extend(cur_features)
 
-        llm_acc = calculate_acc(cur_features, data.category_names)
-
         test_acc, logits, embeddings = train_prism_one_round(
             data=data,
             train_mask=train_mask,
@@ -294,7 +290,6 @@ def run_single_seed(seed_idx, data, graph_nx, args, llm, tokenizer):
         )
 
         seed_round_acc.append(test_acc)
-        seed_llm_acc.append(llm_acc)
 
         if test_acc > best_acc:
             best_acc = test_acc
@@ -304,7 +299,7 @@ def run_single_seed(seed_idx, data, graph_nx, args, llm, tokenizer):
             print_round_summary(
                 cur_round=cur_round,
                 llm_count=len(all_llm_features),
-                llm_acc=llm_acc,
+               
                 test_acc=test_acc,
             )
 
@@ -312,13 +307,13 @@ def run_single_seed(seed_idx, data, graph_nx, args, llm, tokenizer):
                 seed_idx=seed_idx,
                 cur_round=cur_round,
                 test_acc=test_acc,
-                llm_acc=llm_acc,
+             
                 llm_count=len(all_llm_features),
                 selected_count=0,
             )
             break
 
-        selected_nodes, final_score = Select_Additional_Nodes6(
+        selected_nodes, final_score = Select_Additional_Nodes(
             data=data,
             gnn_logits=logits.to(args.device),
             train_mask=train_mask,
@@ -338,7 +333,7 @@ def run_single_seed(seed_idx, data, graph_nx, args, llm, tokenizer):
         print_round_summary(
             cur_round=cur_round,
             llm_count=len(all_llm_features),
-            llm_acc=llm_acc,
+           
             test_acc=test_acc,
             selected_nodes=selected_nodes,
         )
@@ -347,7 +342,6 @@ def run_single_seed(seed_idx, data, graph_nx, args, llm, tokenizer):
             seed_idx=seed_idx,
             cur_round=cur_round,
             test_acc=test_acc,
-            llm_acc=llm_acc,
             llm_count=len(all_llm_features),
             selected_count=len(selected_nodes),
         )
@@ -357,7 +351,6 @@ def run_single_seed(seed_idx, data, graph_nx, args, llm, tokenizer):
         "best_acc": best_acc,
         "best_round": best_round,
         "round_acc": seed_round_acc,
-        "llm_acc": seed_llm_acc,
     }
 
 

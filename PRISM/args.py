@@ -10,8 +10,8 @@ def replace_args_with_dict_values(args, dictionary):
 
 def get_command_line_args():
     parser = argparse.ArgumentParser(description='PRISM')
-    parser.add_argument('--device', type=str, default='cuda:0')
-    parser.add_argument('--dataset', default='cora', type=str)
+    parser.add_argument('--device', type=str, default='cuda:1')
+    parser.add_argument('--dataset', default='pubmed', type=str)
     parser.add_argument('--round', default=5, type=int)
     parser.add_argument('--seed', type=int, default=3)
 
@@ -29,7 +29,7 @@ def get_command_line_args():
     parser.add_argument('--early_stopping', type=int, default=10)
     parser.add_argument('--lr', type=float, default=0.01)
     parser.add_argument('--dropout', type=float, default=0.5)
-
+    parser.add_argument("--label_smoothing", type=float, default=0)
     parser.add_argument('--perspective', type=int, default=3)
     parser.add_argument('--init_n_per_class', type=int, default=3)
     parser.add_argument('--iter_n_per_class', type=int, default=1)
