@@ -6,7 +6,8 @@ from tqdm import tqdm
 from vllm import LLM, SamplingParams
 from transformers import AutoTokenizer
 
-from utils.utils import get_clustered_neighbors
+from utils.neighbor_selection import get_clustered_neighbors
+from llm_cache import load_cache, save_new_entries
 
 
 DEFAULT_MODEL_ID = "meta-llama/Meta-Llama-3.1-8B-Instruct"
@@ -36,7 +37,38 @@ def get_sampling_params(args):
     )
 
 
-def Generate_feature_by_LLM(node_indices, data, graph_nx, args, cur_round, llm=None, tokenizer=None):
+def Generate_feature_by_LLM(node_indices, data, graph_nx, args, cur_round, llm=None, tokenizer=None, use_cache=True):
+    node_ids = [
+        idx.item() if isinstance(idx, torch.Tensor) else int(idx)
+        for idx in node_indices
+    ]
+
+    cache = load_cache(args) if use_cache else {}
+    missing_ids = [node_id for node_id in node_ids if node_id not in cache]
+
+    if missing_ids:
+        new_results_by_node = generate_features_for_nodes(
+            node_ids=missing_ids,
+            data=data,
+            graph_nx=graph_nx,
+            args=args,
+            llm=llm,
+            tokenizer=tokenizer,
+        )
+
+        if use_cache:
+            save_new_entries(args, new_results_by_node)
+
+        cache.update(new_results_by_node)
+
+    results = []
+    for node_id in node_ids:
+        results.extend(cache.get(node_id, []))
+
+    return results
+
+
+def generate_features_for_nodes(node_ids, data, graph_nx, args, llm=None, tokenizer=None):
     if llm is None or tokenizer is None:
         model_id = getattr(args, "llm_model_id", DEFAULT_MODEL_ID)
         llm, tokenizer = load_llm(model_id)
@@ -45,9 +77,7 @@ def Generate_feature_by_LLM(node_indices, data, graph_nx, args, cur_round, llm=N
 
     prompts = []
 
-    for idx in tqdm(node_indices, desc="Build LLM prompts"):
-        node_id = idx.item() if isinstance(idx, torch.Tensor) else int(idx)
-
+    for node_id in tqdm(node_ids, desc="Build LLM prompts"):
         node_prompts = generate_prompts_for_node(
             node_id=node_id,
             data=data,
@@ -58,17 +88,24 @@ def Generate_feature_by_LLM(node_indices, data, graph_nx, args, cur_round, llm=N
 
         prompts.extend(node_prompts)
 
+    new_results_by_node = {node_id: [] for node_id in node_ids}
+
     if len(prompts) == 0:
-        return []
+        return new_results_by_node
 
     prompt_texts = [item["prompt"] for item in prompts]
     outputs = llm.generate(prompt_texts, sampling_params)
 
-    return parse_llm_outputs(
+    parsed_outputs = parse_llm_outputs(
         prompts=prompts,
         outputs=outputs,
         label_names=data.label_names,
     )
+
+    for item in parsed_outputs:
+        new_results_by_node[item["node_id"]].append(item)
+
+    return new_results_by_node
 
 
 def generate_prompts_for_node(node_id, data, graph_nx, args, tokenizer):

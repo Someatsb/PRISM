@@ -95,8 +95,6 @@ def generate_or_load_llm_features(
 ):
     use_cache = getattr(args, "use_llm_cache", True)
 
-    
-
     target_nodes = torch.tensor(
         target_nodes,
         dtype=torch.long,
@@ -111,6 +109,7 @@ def generate_or_load_llm_features(
         cur_round=cur_round,
         llm=llm,
         tokenizer=tokenizer,
+        use_cache=use_cache,
     )
 
     return features
@@ -142,8 +141,8 @@ def prepare_llm_features(
         if item.get("category") != "Unknown"
     ]
 
-    cur_features = Encoding_sbert(cur_features, args)
-    cur_features = weight_setting(cur_features, data, args, cur_round)
+    cur_features = encode_with_sbert(cur_features, args)
+    cur_features = weight_setting(cur_features, data, args)
 
     return cur_features
 
@@ -313,7 +312,7 @@ def run_single_seed(seed_idx, data, graph_nx, args, llm, tokenizer):
             )
             break
 
-        selected_nodes, final_score = Select_Additional_Nodes(
+        selected_nodes, final_score = select_additional_nodes(
             data=data,
             gnn_logits=logits.to(args.device),
             train_mask=train_mask,
@@ -427,8 +426,5 @@ if __name__ == "__main__":
 
     args.main_path = main_path
     args.data_path = f"{main_path}/dataset/{args.dataset}_fixed_sbert.pt"
-
-    if not hasattr(args, "use_llm_cache"):
-        args.use_llm_cache = True
 
     main(args)

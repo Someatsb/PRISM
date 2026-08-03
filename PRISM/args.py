@@ -37,11 +37,14 @@ def get_command_line_args():
     parser.add_argument('--beta', type=float, default=0.5)
     parser.add_argument("--num_nodes_per_view", type=int, default=3)
     parser.add_argument("--mmr_lambda", type=float, default=0.5)
-    args = parser.parse_args()
     parser.add_argument(
         "--llm_model_id",
         type=str,
         default="meta-llama/Meta-Llama-3.1-8B-Instruct",
     )
-    parser.set_defaults(use_llm_cache=False)
+    parser.add_argument('--use_llm_cache', dest='use_llm_cache', action='store_true')
+    parser.add_argument('--no_llm_cache', dest='use_llm_cache', action='store_false')
+    parser.set_defaults(use_llm_cache=True)
+
+    args = parser.parse_args()
     return args
